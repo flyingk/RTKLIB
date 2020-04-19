@@ -2,7 +2,7 @@
 # make all cui applications by gcc
 #
 
-BINDIR = ../bin
+BINDIR = /usr/local/bin
 DIRS   = pos2kml str2str rnx2rtkp convbin rtkrcv
 
 all:

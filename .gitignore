@@ -6,10 +6,3 @@ Release
 Release_Build
 Debug_Build
 __history
-bin/*
-/app/rnx2rtkp/gcc/rnx2rtkp
-/app/pos2kml/gcc/pos2kml
-/app/convbin/gcc/convbin
-/app/rtkrcv/gcc/rtkrcv
-/app/str2str/gcc/str2str
-/src/src.pro.user
