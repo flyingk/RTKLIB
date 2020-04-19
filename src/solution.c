@@ -298,7 +298,7 @@ static int test_solstat(const char *buff)
 /* decode nmea ---------------------------------------------------------------*/
 static int decode_nmea(char *buff, sol_t *sol)
 {
-    char *p,*q,*val[MAXFIELD];
+    char *p,*q,*val[MAXFIELD]={0};
     int n=0;
     
     trace(4,"decode_nmea: buff=%s\n",buff);
@@ -1477,7 +1477,7 @@ extern int outprcopts(unsigned char *buff, const prcopt_t *opt)
     const int sys[]={SYS_GPS,SYS_GLO,SYS_GAL,SYS_QZS,SYS_CMP,SYS_IRN,SYS_SBS,0};
     const char *s1[]={"single","dgps","kinematic","static","static-start","moving-base","fixed",
                  "ppp-kinematic","ppp-static","ppp-fixed",""};
-    const char *s2[]={"L1","L1+L2","L1+L2+E5b","L1+L2+E5b+L5"};
+    const char *s2[]={"L1","L1+L2/E5b","L1+L2/E5b+L5","L1+L2/E5b+L5+L6"};
     const char *s3[]={"forward","backward","combined"};
     const char *s4[]={"off","broadcast","sbas","iono-free","estimation",
                       "ionex tec","qzs","lex","vtec_sf","vtec_ef","gtec",""};
@@ -1634,7 +1634,7 @@ extern int outsols(unsigned char *buff, const sol_t *sol, const double *rb,
     double gpst;
     int week,timeu;
     const char *sep=opt2sep(opt);
-    char s[64];
+    char s[256];
     unsigned char *p=buff;
     
     trace(3,"outsols :\n");

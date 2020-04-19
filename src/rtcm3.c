@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------
 * rtcm3.c : rtcm ver.3 message decorder functions
 *
-*          Copyright (C) 2009-2018 by T.TAKASU, All rights reserved.
+*          Copyright (C) 2009-2019 by T.TAKASU, All rights reserved.
 *
 * references :
 *     see rtcm.c
@@ -37,6 +37,7 @@
 *                           change mt for ssr 7 phase biases
 *                           add rtcm option -GALINAV, -GALFNAV
 *           2018/11/05 1.20 fix problem on invalid time in message monitor
+*           2019/05/10 1.21 save galileo E5b data to obs index 2
 *-----------------------------------------------------------------------------*/
 #include "rtklib.h"
 
@@ -99,8 +100,8 @@ const char *msm_sig_sbs[32]={
     ""  ,""  ,""  ,""  ,""  ,""  ,""  ,""
 };
 const char *msm_sig_cmp[32]={
-    /* BeiDou: ref [15] table 3.5-106 */
-    ""  ,"1I","1Q","1X",""  ,""  ,""  ,"6I","6Q","6X",""  ,""  ,
+    /* BeiDou: ref [17] table 3.5-108 */
+    ""  ,"2I","2Q","2X","","",""  ,"6I","6Q","6X",""  ,""  ,
     ""  ,"7I","7Q","7X",""  ,""  ,""  ,""  ,""  ,""  ,""  ,""  ,
     ""  ,""  ,""  ,""  ,""  ,""  ,""  ,""
 };
@@ -1346,7 +1347,6 @@ static int decode_ssr2_head(rtcm_t *rtcm, int sys, int *sync, int *iod,
     *hsize=i;
     return nsat;
 }
-
 /* ssr signal and tracking mode ids ------------------------------------------*/
 static const int codes_gps[]={
     CODE_L1C,CODE_L1P,CODE_L1W,CODE_L1Y,CODE_L1M,CODE_L2C,CODE_L2D,CODE_L2S,
@@ -1366,7 +1366,7 @@ static const int codes_qzs[]={
     CODE_L5X,CODE_L6S,CODE_L6L,CODE_L6X,CODE_L1X
 };
 static const int codes_bds[]={
-    CODE_L1I,CODE_L1Q,CODE_L1X,CODE_L2I,CODE_L2Q,CODE_L2X,
+    CODE_L2I,CODE_L2Q,CODE_L2X,CODE_L1I,CODE_L1Q,CODE_L1X,
     CODE_L7I,CODE_L7Q,CODE_L7X,CODE_L6I,CODE_L6Q,CODE_L6X
 };
 static const int codes_sbs[]={
@@ -1822,8 +1822,16 @@ static void save_msm_obs(rtcm_t *rtcm, int sys, msm_h_t *h, const double *r,
             default: sig[i]=""; break;
         }
         /* signal to rinex obs type */
-        code[i]=obs2code(sys,sig[i],freq+i);
-
+        code[i]=obs2code(sig[i],freq+i);
+        
+        /* freqency index for beidou and galileo */
+        if (sys==SYS_CMP) {
+            if      (freq[i]==5) freq[i]=2; /* B2 */
+            else if (freq[i]==4) freq[i]=3; /* B3 */
+        }
+        else if (sys==SYS_GAL) {
+            if (freq[i]==5) freq[i]=2; /* E5b */
+        }
         if (code[i]!=CODE_NONE) {
             if (q) q+=sprintf(q,"L%s%s",sig[i],i<h->nsig-1?",":"");
         }
@@ -1867,6 +1875,7 @@ static void save_msm_obs(rtcm_t *rtcm, int sys, msm_h_t *h, const double *r,
                     fn=ex[i]-7;
                     wl=CLIGHT/((freq[k]==2?FREQ2_GLO:FREQ1_GLO)+
                                (freq[k]==2?DFRQ2_GLO:DFRQ1_GLO)*fn);
+                    rtcm->obs.data[index].freq=(char)ex[i];
                 }
                 /* pseudorange (m) */
                 if (r[i]!=0.0&&pr[j]>-1E12) {
@@ -1881,7 +1890,7 @@ static void save_msm_obs(rtcm_t *rtcm, int sys, msm_h_t *h, const double *r,
                     rtcm->obs.data[index].D[ind[k]]=(float)(-(rr[i]+rrf[j])/wl);
                 }
                 rtcm->obs.data[index].LLI[ind[k]]=
-                    lossoflock(rtcm,sat,ind[k],lock[j])+(half[j]?3:0);
+                    lossoflock(rtcm,sat,ind[k],lock[j])+(half[j]?2:0);
                 rtcm->obs.data[index].SNR [ind[k]]=(unsigned char)(cnr[j]*4.0);
                 rtcm->obs.data[index].code[ind[k]]=code[k];
             }

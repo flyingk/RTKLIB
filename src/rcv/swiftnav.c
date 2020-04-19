@@ -15,8 +15,6 @@
 #include <math.h>
 #include <stdint.h>
 
-static const char rcsid[] = "$Id: Swiftnav SBP,v 1.0 2017/02/01 FT $";
-
 #define SBP_SYNC1 0x55 /* SBP message header sync */
 
 #define ID_MEASEPOCH 0x004A      /* observation */
@@ -191,11 +189,6 @@ static const uint32_t CRC_16CCIT_LookUp[256] = {
 static const uint32_t rtcm_phase_lock_table[16] = {
     0,    32,   64,    128,   256,   512,    1024,   2048,
     4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288};
-
-static const double ura_eph[] = {/* ura values */
-                                 2.4,    3.4,    4.85,   6.85,  9.65,  13.65,
-                                 24.0,   48.0,   96.0,   192.0, 384.0, 768.0,
-                                 1536.0, 3072.0, 6144.0, 0.0};
 
 static const uint8_t decoding_table[256] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -494,7 +487,7 @@ static void decode_gpsnav_common_dep1(uint8_t *_pBuff, eph_t *_pEph) {
 
   _pEph->toes = U4(_pBuff + 4);
   uWeekE = U2(_pBuff + 8);
-  _pEph->sva = uraindex(R8(_pBuff + 10), SYS_GPS); /* URA index */
+  _pEph->sva = uraindex(R8(_pBuff + 10)); /* URA index */
   _pEph->fit = U4(_pBuff + 18) / 3600;
   /* _pEph->flag = U1(_pBuff + 22); SBP payload does not have L2 flag */
   _pEph->svh = U1(_pBuff + 23);
@@ -539,7 +532,7 @@ static void decode_gpsnav_common(uint8_t *_pBuff, eph_t *_pEph) {
 
   _pEph->toes = U4(_pBuff + 4);
   uWeekE = U2(_pBuff + 8);
-  _pEph->sva = uraindex(R4(_pBuff + 10), SYS_CMP); /* URA index */
+  _pEph->sva = uraindex(R4(_pBuff + 10)); /* URA index */
   _pEph->fit = U4(_pBuff + 14) / 3600;
   /* _pEph->flag = U1(_pBuff + 18); SBP payload does not have L2 flag */
   _pEph->svh = U1(_pBuff + 19);
@@ -584,7 +577,7 @@ static void decode_bdsnav_common(uint8_t *_pBuff, eph_t *_pEph) {
 
   _pEph->toes = U4(_pBuff + 4) - BDS_SECOND_TO_GPS_SECOND;
   uWeekE = U2(_pBuff + 8);
-  _pEph->sva = uraindex(R4(_pBuff + 10),SYS_CMP); /* URA index */
+  _pEph->sva = uraindex(R4(_pBuff + 10)); /* URA index */
   _pEph->fit = U4(_pBuff + 14) ? 0 : 4;
   _pEph->flag = U1(_pBuff + 18);
 
@@ -629,7 +622,7 @@ static void decode_galnav_common(uint8_t *_pBuff, eph_t *_pEph) {
 
   _pEph->toes = U4(_pBuff + 4);
   uWeekE = U2(_pBuff + 8);
-  _pEph->sva = uraindex(R4(_pBuff + 10), SYS_GAL); /* URA index */
+  _pEph->sva = sisa_index(R4(_pBuff + 10)); /* URA index */
   _pEph->fit = U4(_pBuff + 14) ? 0 : 4;
   _pEph->flag = U1(_pBuff + 18);
 

@@ -326,7 +326,7 @@ static void setmask(const char *argv, rnxopt_t *opt, int mask)
         else if (p[0]=='C') i=5;
         else if (p[0]=='I') i=6;
         else continue;
-        if ((code=obs2code(0,p+2,NULL))) {
+        if ((code=obs2code(p+2,NULL))) {
             opt->mask[i][code-1]=mask?'1':'0';
         }
     }
@@ -340,7 +340,7 @@ static int cmdopts(int argc, char **argv, rnxopt_t *opt, char **ifile,
     int i,j,k,sat,nf=3,nc=2,format=-1;
     char *p,*sys,*fmt="",*paths[1],path[1024],buff[256];
     
-    opt->rnxver=2.11;
+    opt->rnxver=3.03;
     opt->obstype=OBSTYPE_PR|OBSTYPE_CP;
     opt->navsys=SYS_GPS|SYS_GLO|SYS_GAL|SYS_QZS|SYS_SBS|SYS_CMP;
     opt->scanobs=1;
@@ -497,11 +497,10 @@ static int cmdopts(int argc, char **argv, rnxopt_t *opt, char **ifile,
     }
     if (nf>=1) opt->freqtype|=FREQTYPE_L1;
     if (nf>=2) opt->freqtype|=FREQTYPE_L2;
-    if (nf>=3) opt->freqtype|=FREQTYPE_E5b;
-    if (nf>=4) opt->freqtype|=FREQTYPE_L5;
-    if (nf>=5) opt->freqtype|=FREQTYPE_E6;
-    if (nf>=6) opt->freqtype|=FREQTYPE_E5ab;
-    if (nf>=7) opt->freqtype|=FREQTYPE_S;
+    if (nf>=3) opt->freqtype|=FREQTYPE_L5;
+    if (nf>=4) opt->freqtype|=FREQTYPE_E6;
+    if (nf>=5) opt->freqtype|=FREQTYPE_E5ab;
+    if (nf>=6) opt->freqtype|=FREQTYPE_S;
     
     if (*fmt) {
         if      (!strcmp(fmt,"rtcm2")) format=STRFMT_RTCM2;
@@ -562,7 +561,7 @@ int main(int argc, char **argv)
         fprintf(stderr,"input format can not be recognized\n");
         return -1;
     }
-    sprintf(opt.prog,"%s %s",PRGNAME,VER_RTKLIB);
+    sprintf(opt.prog,"%s %s %s",PRGNAME,VER_RTKLIB,PATCH_LEVEL);
     sprintf(opt.comment[0],"log: %-55.55s",ifile);
     sprintf(opt.comment[1],"format: %s",formatstrs[format]);
     if (*opt.rcvopt) {
